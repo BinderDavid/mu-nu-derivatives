@@ -1,0 +1,76 @@
+\documentclass{article}
+\usepackage[margin=0.7in]{geometry}
+\usepackage[parfill]{parskip}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,amsfonts,amsthm}
+\usepackage{mathtools}
+\usepackage{booktabs}
+
+\author{David Binder}
+\title{Partial Derivatives of Mixed Inductive and Coinductive Types}
+
+\newcommand{\sep}{\quad | \quad}
+\begin{document}
+
+\maketitle
+
+\section{Syntax of Types}
+
+\begin{align*}
+  S,T \Coloneqq X \sep 0 \sep 1 \sep S + T \sep S \times T \sep \mu X.T \sep \nu X.T
+\end{align*}
+
+\subsection{Examples}
+
+\begin{center}
+  \begin{tabular}{cc}
+    \toprule
+    Type & Definition \\
+    \midrule
+    Booleans & $1 + 1$ \\
+    Nat & $\mu X. 1 + X$ \\
+    BTree & $\mu X. 1 + (X \times X)$ \\
+    List T & $\mu X.1 + (T \times X)$ \\
+    RoseTree T & $\mu X. 1 + (T \times List X)$ \\
+    Stream T & $\nu X. T \times X$ \\
+    \bottomrule
+  \end{tabular}
+\end{center}
+
+\section{Partial Differentiation}
+
+\begin{align*}
+  \partial_X(X) &\coloneqq 1 \\
+  \partial_X(Y) &\coloneqq 0 \quad \text{where $X \neq Y$} \\
+  \partial_X(0) &\coloneqq 0 \\
+  \partial_X(1) &\coloneqq 0 \\
+  \partial_X(S + T) &\coloneqq \partial_X(S) + \partial_X(T) \\
+  \partial_X(S \times T) &\coloneqq \partial_X(S)\times T + S \times \partial_X(T) \\
+  \partial_X(\mu Y.T) &\coloneqq \mu Y. (\partial_X(T)[\mu Y.T / Y]) + (Y \times \partial_Y(T)[\mu Y.T / Y])
+\end{align*}
+
+\section{Zippers}
+The zipper of an inductive type is defined as:
+\begin{align*}
+  Z(\mu X.T) \coloneqq \text{List}(\partial_X(T)[\mu X.T/X])
+\end{align*}
+
+\subsection{Examples}
+
+\begin{align*}
+  Z(RoseTree T) = List  (T \times \mu Y.(List (RoseTree T) + Y \times (RoseTree T)))
+\end{align*}
+
+due to:
+
+\begin{align*}
+  \partial_X(1 + (T \times List X)) &= \partial_X(T \times List X) \\
+  &= T \times \partial_X(List X) \\
+  &= T \times \partial_X(\mu Y. 1 + (X \times Y)) \\
+  &= T \times \mu Y.(Y[List X/Y] + Y \times X[List X /Y]) \\
+  &= T \times \mu Y.(List X + Y \times X) \\
+  &= T \times \mu Y.(List X + Y \times X) \\
+  &\simeq T \times List X \times List X
+\end{align*}
+
+\end{document}
